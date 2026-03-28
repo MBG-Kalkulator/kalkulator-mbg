@@ -5,8 +5,10 @@ import plotly.express as px
 # Konfigurasi Halaman
 st.set_page_config(page_title="Kalkulator Dampak MBG", page_icon="🍽️", layout="wide")
 
+# --- BAGIAN PEMBUKA ---
 st.title("🍽️ Kalkulator Dampak Positif Program Makan Bergizi Gratis (MBG)")
-st.caption("Gunakan tuas (slider) di bawah ini untuk mensimulasikan dampak ekonomi dan investasi SDM dari program MBG. Anda juga bisa mengklik angka di sebelah kanan tuas untuk mengetiknya secara manual.")
+st.write("Kalkulator ini dirancang untuk memproyeksikan dampak positif Program Makan Bergizi Gratis (MBG) terhadap perputaran ekonomi daerah dan investasi kualitas Sumber Daya Manusia (SDM) di masa depan.")
+st.caption("💡 Tips: Anda bisa menggeser tuas (slider) di bawah ini, atau klik pada angka di sebelah kanan tuas untuk mengetik angkanya secara manual.")
 
 st.divider()
 
@@ -87,7 +89,6 @@ col4.metric("Nilai Tambah SDM (Masa Depan)", f"Rp {roi_sdm_triliun:,.0f} T", f"R
 st.divider()
 st.subheader("📈 Visualisasi Perbandingan Nilai (Triliun Rupiah)")
 
-# Data untuk Bar Chart
 data_grafik = pd.DataFrame({
     "Kategori": ["Anggaran Awal", "Dampak Perputaran Ekonomi (PDB)", "Proyeksi Nilai Tambah SDM"],
     "Nilai (Triliun Rupiah)": [anggaran_triliun, dampak_pdb_triliun, roi_sdm_triliun]
@@ -102,39 +103,48 @@ fig = px.bar(
     color_discrete_sequence=["#EF553B", "#00CC96", "#636EFA"]
 )
 fig.update_traces(texttemplate='Rp %{text:,.0f} T', textposition='outside')
-fig.update_layout(showlegend=False, yaxis_title="Triliun Rupiah", xaxis_title="")
-st.plotly_chart(fig, use_container_width=True)
+# Menonaktifkan semua interaksi geser/zoom di grafik
+fig.update_layout(
+    showlegend=False, 
+    yaxis_title="Triliun Rupiah", 
+    xaxis_title="",
+    dragmode=False
+)
+fig.update_xaxes(fixedrange=True)
+fig.update_yaxes(fixedrange=True)
+
+# Memasukkan argumen staticPlot agar grafik murni menjadi mode tampilan saja (view-only)
+st.plotly_chart(fig, use_container_width=True, config={'staticPlot': True})
+
 
 # --- BAGIAN PENJELASAN & RUMUS ---
 st.divider()
-st.header("📖 Dari Mana Angka-Angka Ini Berasal?")
+st.header("📖 Mengapa MBG adalah Investasi, Bukan Biaya?")
 
-st.markdown("""
-### 1. Efek Pengganda Ekonomi (*Keynesian Multiplier*)
-Dana MBG tidak hilang. Dana tersebut dibelanjakan ke peternak telur, petani sayur, dan dapur umum. Mereka kemudian membelanjakan pendapatannya lagi. Perputaran uang ini dihitung menggunakan rumus Multiplier:
-""")
-st.latex(r"\Delta Y = \frac{1}{1 - MPC} \times \Delta G")
+st.markdown("### 1. Nilai Tambah SDM Jangka Panjang (Framework WFP & Rockefeller)")
+st.markdown("Berdasarkan studi *UN World Food Programme (WFP)* dan *Rockefeller Institute* (2023), **setiap investasi 1 USD untuk program makanan bergizi di sekolah akan memberikan nilai kembalian (ROI) sebesar 5 hingga 35 USD.** Hal ini terjadi karena efek berantai biologis dan akademis: Kenyang $\\rightarrow$ Tidak Absen $\\rightarrow$ Konsentrasi Naik $\\rightarrow$ Nilai Ujian Naik $\\rightarrow$ Pendidikan Baik $\\rightarrow$ Usia Produktif Panjang $\\rightarrow$ **Pendapatan Seumur Hidup Meningkat**.")
+
+# Highlight Rumus menggunakan st.info
+st.info(r"**Rumus:** $\text{Total Nilai SDM} = \text{Anggaran MBG} \times \text{Asumsi ROI (5x hingga 35x)}$")
+
+st.markdown("### 2. Efek Pengganda Ekonomi Makro (*Keynesian Multiplier*)")
+st.markdown("Dana MBG tidak hilang dimakan. Dana ini pindah dari kas negara ke kantong peternak telur, petani sayur, dan ibu-ibu pengelola dapur umum. Semakin besar porsi uang yang dibelanjakan kembali oleh masyarakat bawah (*Marginal Propensity to Consume* / MPC), semakin kencang roda ekonomi berputar menciptakan PDB baru.")
+
+# Highlight Rumus menggunakan st.info
+st.info(r"**Rumus:** $\Delta Y = \frac{1}{1 - MPC} \times \Delta G$")
 st.markdown("""
 * **$\Delta Y$**: Total penambahan Pendapatan Domestik Bruto (PDB) atau roda ekonomi.
-* **$MPC$**: *Marginal Propensity to Consume* (kecenderungan konsumsi).
+* **$MPC$**: *Marginal Propensity to Consume* (Kecenderungan masyarakat membelanjakan uangnya).
 * **$\Delta G$**: Anggaran MBG (Suntikan dana pemerintah).
-
-### 2. Estimasi Penerima Manfaat (Kapasitas Program)
-Jumlah anak yang gizinya terpenuhi dihitung dari total anggaran dibagi biaya operasional harian selama setahun penuh.
 """)
-st.latex(r"\text{Penerima Manfaat} = \frac{\text{Total Anggaran}}{\text{Harga Per Porsi} \times \text{Hari Efektif Sekolah}}")
 
-### 3. Nilai Tambah SDM Jangka Panjang (Framework PBB & Rockefeller)
-st.markdown("""
-Berdasarkan studi *UN World Food Programme (WFP)* dan *Rockefeller Institute* (2023), program makanan bergizi di sekolah memiliki efek biologis dan akademis yang berantai:
-Kenyang $\\rightarrow$ Tidak Absen $\\rightarrow$ Konsentrasi Naik $\\rightarrow$ Nilai Ujian Naik $\\rightarrow$ Pendidikan Baik $\\rightarrow$ Usia Produktif Panjang $\\rightarrow$ **Pendapatan Seumur Hidup Meningkat**.
-""")
-st.latex(r"\text{Total Nilai SDM} = \text{Anggaran MBG} \times \text{Asumsi ROI (5x hingga 35x)}")
+st.markdown("### 3. Desentralisasi Ekonomi ke Desa & Kapasitas Penerima")
+st.markdown("Selama ini perputaran uang tersentralisasi di kota besar. Dengan MBG, jika diasumsikan persentase besar bahan baku wajib dibeli dari UMKM dan petani lokal, maka terjadi transfer kekayaan besar-besaran ke **75.265 desa** di Indonesia. Program ini secara tidak langsung menciptakan lapangan kerja baru di daerah serta memperluas kapasitas jumlah anak yang gizinya terpenuhi.")
 
-### 4. Desentralisasi Uang ke Tingkat Desa
-st.markdown("""
-Untuk memastikan uang dari pusat turun ke bawah dan menciptakan lapangan kerja baru bagi warga lokal (khususnya perempuan/ibu-ibu):
-""")
-st.latex(r"\text{Uang Beredar per Desa} = \frac{\text{Anggaran MBG} \times \% \text{Bahan Baku Lokal}}{\text{Jumlah Desa di Indonesia (75.265)}}")
+# Highlight Rumus menggunakan st.info
+st.info(r"**Rumus Uang Beredar per Desa:** $\frac{\text{Anggaran MBG} \times \% \text{Bahan Baku Lokal}}{\text{Jumlah Desa di Indonesia}}$")
+st.info(r"**Rumus Penerima Manfaat:** $\frac{\text{Total Anggaran}}{\text{Harga Per Porsi} \times \text{Hari Efektif Sekolah}}$")
 
-st.caption("Kalkulator tandingan ini disusun menggunakan pendekatan ilmu ekonomi makro dan data riset lembaga internasional.")
+st.divider()
+# --- BAGIAN PENUTUP (Sesuai Redaksi Baru) ---
+st.caption("Kalkulator ini disusun menggunakan pendekatan ilmu ekonomi makro dan data riset lembaga internasional.")
